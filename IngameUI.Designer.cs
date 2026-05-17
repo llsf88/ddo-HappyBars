@@ -43,11 +43,17 @@ namespace UiRuler
             tabUiRuler = new System.Windows.Forms.TabPage();
             tabHappyBars = new System.Windows.Forms.TabPage();
             chkSnapHotbars = new System.Windows.Forms.CheckBox();
+            lblHorizontalGap = new System.Windows.Forms.Label();
+            nudHorizontalGap = new System.Windows.Forms.NumericUpDown();
+            lblVerticalGap = new System.Windows.Forms.Label();
+            nudVerticalGap = new System.Windows.Forms.NumericUpDown();
             tabHowToUse = new System.Windows.Forms.TabPage();
             txtHowToUse = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)nudGridSpacing).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudOffsetX).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudOffsetY).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)nudHorizontalGap).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)nudVerticalGap).BeginInit();
             tabTools.SuspendLayout();
             tabUiRuler.SuspendLayout();
             tabHappyBars.SuspendLayout();
@@ -318,11 +324,11 @@ namespace UiRuler
             // 
             txtHotbarLayout.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             txtHotbarLayout.Font = new System.Drawing.Font("Consolas", 9F);
-            txtHotbarLayout.Location = new System.Drawing.Point(12, 58);
+            txtHotbarLayout.Location = new System.Drawing.Point(12, 104);
             txtHotbarLayout.Multiline = true;
             txtHotbarLayout.Name = "txtHotbarLayout";
             txtHotbarLayout.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            txtHotbarLayout.Size = new System.Drawing.Size(884, 490);
+            txtHotbarLayout.Size = new System.Drawing.Size(884, 444);
             txtHotbarLayout.TabIndex = 30;
             txtHotbarLayout.Text = "1,5\r\n2,6\r\n3,7\r\n4,8";
             // 
@@ -371,6 +377,10 @@ namespace UiRuler
             // tabHappyBars
             // 
             tabHappyBars.Controls.Add(txtHotbarLayout);
+            tabHappyBars.Controls.Add(nudVerticalGap);
+            tabHappyBars.Controls.Add(lblVerticalGap);
+            tabHappyBars.Controls.Add(nudHorizontalGap);
+            tabHappyBars.Controls.Add(lblHorizontalGap);
             tabHappyBars.Controls.Add(chkSnapHotbars);
             tabHappyBars.Controls.Add(btnLoadHotbars);
             tabHappyBars.Controls.Add(btnSaveHotbars);
@@ -394,6 +404,42 @@ namespace UiRuler
             chkSnapHotbars.Text = "Snap hotbars";
             chkSnapHotbars.UseVisualStyleBackColor = true;
             chkSnapHotbars.CheckedChanged += chkSnapHotbars_CheckedChanged;
+            // 
+            // lblHorizontalGap
+            // 
+            lblHorizontalGap.AutoSize = true;
+            lblHorizontalGap.Location = new System.Drawing.Point(12, 64);
+            lblHorizontalGap.Name = "lblHorizontalGap";
+            lblHorizontalGap.Size = new System.Drawing.Size(92, 25);
+            lblHorizontalGap.TabIndex = 32;
+            lblHorizontalGap.Text = "H gap px";
+            // 
+            // nudHorizontalGap
+            // 
+            nudHorizontalGap.Location = new System.Drawing.Point(110, 60);
+            nudHorizontalGap.Maximum = new decimal(new int[] { 50, 0, 0, 0 });
+            nudHorizontalGap.Name = "nudHorizontalGap";
+            nudHorizontalGap.Size = new System.Drawing.Size(80, 31);
+            nudHorizontalGap.TabIndex = 33;
+            nudHorizontalGap.Value = new decimal(new int[] { 5, 0, 0, 0 });
+            // 
+            // lblVerticalGap
+            // 
+            lblVerticalGap.AutoSize = true;
+            lblVerticalGap.Location = new System.Drawing.Point(214, 64);
+            lblVerticalGap.Name = "lblVerticalGap";
+            lblVerticalGap.Size = new System.Drawing.Size(88, 25);
+            lblVerticalGap.TabIndex = 34;
+            lblVerticalGap.Text = "V gap px";
+            // 
+            // nudVerticalGap
+            // 
+            nudVerticalGap.Location = new System.Drawing.Point(308, 60);
+            nudVerticalGap.Maximum = new decimal(new int[] { 50, 0, 0, 0 });
+            nudVerticalGap.Name = "nudVerticalGap";
+            nudVerticalGap.Size = new System.Drawing.Size(80, 31);
+            nudVerticalGap.TabIndex = 35;
+            nudVerticalGap.Value = new decimal(new int[] { 5, 0, 0, 0 });
             // 
             // tabHowToUse
             // 
@@ -441,6 +487,8 @@ namespace UiRuler
             ((System.ComponentModel.ISupportInitialize)nudGridSpacing).EndInit();
             ((System.ComponentModel.ISupportInitialize)nudOffsetX).EndInit();
             ((System.ComponentModel.ISupportInitialize)nudOffsetY).EndInit();
+            ((System.ComponentModel.ISupportInitialize)nudHorizontalGap).EndInit();
+            ((System.ComponentModel.ISupportInitialize)nudVerticalGap).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -473,6 +521,10 @@ namespace UiRuler
         private System.Windows.Forms.TabPage tabUiRuler;
         private System.Windows.Forms.TabPage tabHappyBars;
         private System.Windows.Forms.CheckBox chkSnapHotbars;
+        private System.Windows.Forms.Label lblHorizontalGap;
+        private System.Windows.Forms.NumericUpDown nudHorizontalGap;
+        private System.Windows.Forms.Label lblVerticalGap;
+        private System.Windows.Forms.NumericUpDown nudVerticalGap;
         private System.Windows.Forms.TabPage tabHowToUse;
         private System.Windows.Forms.TextBox txtHowToUse;
     }

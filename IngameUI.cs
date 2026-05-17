@@ -107,7 +107,6 @@ namespace UiRuler
         private const int SnapDistancePixels = 40;
         private const int SnapActivationPixels = 40;
         private const int HotbarLayoutClientBottomMargin = 30;
-        private const int HotbarLayoutHorizontalGap = 5;
         public IngameUI(IDdoGameDataProvider provider, string folder)
         {
             InitializeComponent();
@@ -617,6 +616,10 @@ namespace UiRuler
                 return;
             }
 
+            Hide();
+            Application.DoEvents();
+            Thread.Sleep(150);
+
             var moved = 0;
             var moveOrder = GetHotbarLayoutMoveOrder(entries, anchor, layoutWasShifted);
             foreach (var entry in moveOrder)
@@ -923,8 +926,10 @@ namespace UiRuler
             return true;
         }
 
-        private static void PositionLayout(List<HotbarLayoutEntry> entries, HotbarLayoutEntry anchor, Point anchorLocation)
+        private void PositionLayout(List<HotbarLayoutEntry> entries, HotbarLayoutEntry anchor, Point anchorLocation)
         {
+            var horizontalGap = GetHotbarLayoutHorizontalGap();
+            var verticalGap = GetHotbarLayoutVerticalGap();
             var rowHeights = entries
                 .GroupBy(e => e.Row)
                 .ToDictionary(group => group.Key, group => group.Max(e => e.Height));
@@ -932,14 +937,24 @@ namespace UiRuler
                 .GroupBy(e => e.Column)
                 .ToDictionary(group => group.Key, group => group.Max(e => e.Width));
 
-            var anchorX = SumBefore(columnWidths, anchor.Column) + (anchor.Column * HotbarLayoutHorizontalGap);
-            var anchorY = SumBefore(rowHeights, anchor.Row);
+            var anchorX = SumBefore(columnWidths, anchor.Column) + (anchor.Column * horizontalGap);
+            var anchorY = SumBefore(rowHeights, anchor.Row) + (anchor.Row * verticalGap);
 
             foreach (var entry in entries)
             {
-                entry.Left = anchorLocation.X + SumBefore(columnWidths, entry.Column) + (entry.Column * HotbarLayoutHorizontalGap) - anchorX;
-                entry.Top = anchorLocation.Y + SumBefore(rowHeights, entry.Row) - anchorY;
+                entry.Left = anchorLocation.X + SumBefore(columnWidths, entry.Column) + (entry.Column * horizontalGap) - anchorX;
+                entry.Top = anchorLocation.Y + SumBefore(rowHeights, entry.Row) + (entry.Row * verticalGap) - anchorY;
             }
+        }
+
+        private int GetHotbarLayoutHorizontalGap()
+        {
+            return (int)nudHorizontalGap.Value;
+        }
+
+        private int GetHotbarLayoutVerticalGap()
+        {
+            return (int)nudVerticalGap.Value;
         }
 
         private static int SumBefore(Dictionary<int, int> sizes, int index)
@@ -1373,7 +1388,7 @@ namespace UiRuler
                 .ToDictionary(pair => pair.Key, pair => pair.Value);
 
             var dragDirection = GetDragDirection(startRects[movedIndex], movedRect);
-            if (!TryFindSnappedHotbarPosition(movedRect, otherRects, Cursor.Position, dragDirection, out var snap))
+            if (!TryFindSnappedHotbarPosition(movedRect, otherRects, Cursor.Position, dragDirection, GetHotbarLayoutHorizontalGap(), out var snap))
                 return;
 
             if (IsAtSavedPosition(movedRect, snap.TargetRect.Left, snap.TargetRect.Top))
@@ -1410,7 +1425,7 @@ namespace UiRuler
                 .ToDictionary(pair => pair.Key, pair => pair.Value);
 
             var dragDirection = GetDragDirection(startRects[movedIndex], movedRect);
-            if (!TryFindSnappedHotbarPosition(movedRect, otherRects, Cursor.Position, dragDirection, out var snap))
+            if (!TryFindSnappedHotbarPosition(movedRect, otherRects, Cursor.Position, dragDirection, GetHotbarLayoutHorizontalGap(), out var snap))
             {
                 _snapPreviewActive = false;
                 return;
@@ -1488,7 +1503,7 @@ namespace UiRuler
             return dy < 0 ? SnapSide.Above : SnapSide.Below;
         }
 
-        private static bool TryFindSnappedHotbarPosition(Rectangle movedRect, Dictionary<int, Rectangle> otherRects, Point mouseScreen, SnapSide dragDirection, out HotbarSnapCandidate snap)
+        private static bool TryFindSnappedHotbarPosition(Rectangle movedRect, Dictionary<int, Rectangle> otherRects, Point mouseScreen, SnapSide dragDirection, int horizontalGap, out HotbarSnapCandidate snap)
         {
             snap = default;
             var candidates = new List<HotbarSnapCandidate>();
@@ -1503,8 +1518,8 @@ namespace UiRuler
 
                 AddSnapCandidate(movedRect, anchor.Left, anchor.Top - movedRect.Height, anchor, SnapSide.Above, mouseScreen, candidates);
                 AddSnapCandidate(movedRect, anchor.Left, anchor.Bottom, anchor, SnapSide.Below, mouseScreen, candidates);
-                AddSnapCandidate(movedRect, anchor.Left - movedRect.Width - HotbarLayoutHorizontalGap, anchor.Top, anchor, SnapSide.Left, mouseScreen, candidates);
-                AddSnapCandidate(movedRect, anchor.Right + HotbarLayoutHorizontalGap, anchor.Top, anchor, SnapSide.Right, mouseScreen, candidates);
+                AddSnapCandidate(movedRect, anchor.Left - movedRect.Width - horizontalGap, anchor.Top, anchor, SnapSide.Left, mouseScreen, candidates);
+                AddSnapCandidate(movedRect, anchor.Right + horizontalGap, anchor.Top, anchor, SnapSide.Right, mouseScreen, candidates);
 
                 foreach (var candidate in candidates
                     .Where(c => c.NeighborRect == anchor)
@@ -1762,25 +1777,52 @@ namespace UiRuler
 
         private static void DragMouse(Point start, Point end)
         {
-            SetCursorPos(start.X, start.Y);
-            Thread.Sleep(200);
-            mouse_event(MouseEventLeftDown, 0, 0, 0, UIntPtr.Zero);
-
-            Thread.Sleep(200);
-            const int steps = 36;
-            for (var i = 1; i <= steps; i++)
+            try
             {
-                if (IsEscapePressed())
-                    break;
+                SetMouseClip(start);
+                SetCursorPos(start.X, start.Y);
+                Thread.Sleep(200);
+                mouse_event(MouseEventLeftDown, 0, 0, 0, UIntPtr.Zero);
 
-                var x = start.X + ((end.X - start.X) * i / steps);
-                var y = start.Y + ((end.Y - start.Y) * i / steps);
-                SetCursorPos(x, y);
-                Thread.Sleep(18);
+                Thread.Sleep(200);
+                const int steps = 36;
+                for (var i = 1; i <= steps; i++)
+                {
+                    if (IsEscapePressed())
+                        break;
+
+                    var x = start.X + ((end.X - start.X) * i / steps);
+                    var y = start.Y + ((end.Y - start.Y) * i / steps);
+                    var point = new Point(x, y);
+                    SetMouseClip(point);
+                    SetCursorPos(x, y);
+                    Thread.Sleep(18);
+                }
+
+                Thread.Sleep(250);
             }
+            finally
+            {
+                mouse_event(MouseEventLeftUp, 0, 0, 0, UIntPtr.Zero);
+                ReleaseMouseClip();
+            }
+        }
 
-            Thread.Sleep(250);
-            mouse_event(MouseEventLeftUp, 0, 0, 0, UIntPtr.Zero);
+        private static void SetMouseClip(Point point)
+        {
+            var rect = new RECT
+            {
+                Left = point.X - 2,
+                Top = point.Y - 2,
+                Right = point.X + 3,
+                Bottom = point.Y + 3
+            };
+            ClipCursor(ref rect);
+        }
+
+        private static void ReleaseMouseClip()
+        {
+            ClipCursor(IntPtr.Zero);
         }
 
         private static void ClickMouse(int x, int y)
@@ -1823,6 +1865,12 @@ namespace UiRuler
 
         [DllImport("user32.dll")]
         private static extern short GetAsyncKeyState(int vKey);
+
+        [DllImport("user32.dll")]
+        private static extern bool ClipCursor(ref RECT lpRect);
+
+        [DllImport("user32.dll")]
+        private static extern bool ClipCursor(IntPtr lpRect);
 
         private static bool IsEscapePressed()
         {
