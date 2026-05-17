@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DH": {
+      "commandName": "Executable",
+      "executablePath": "..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\..\\\\dungeon-helper\\\\src\\\\VoK.DungeonHelper\\\\bin\\\\x64\\\\Debug\\\\net8.0-windows10.0.17763.0\\\\win-x64\\\\DungeonHelper.exe"
+    }
+  }
+}
