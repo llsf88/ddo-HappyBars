@@ -1388,7 +1388,8 @@ namespace UiRuler
                 .ToDictionary(pair => pair.Key, pair => pair.Value);
 
             var dragDirection = GetDragDirection(startRects[movedIndex], movedRect);
-            if (!TryFindSnappedHotbarPosition(movedRect, otherRects, Cursor.Position, dragDirection, GetHotbarLayoutHorizontalGap(), out var snap))
+            var clientBounds = TryGetClientAreaLayoutRectangle();
+            if (!TryFindSnappedHotbarPosition(movedRect, otherRects, Cursor.Position, dragDirection, GetHotbarLayoutHorizontalGap(), clientBounds, out var snap))
                 return;
 
             if (IsAtSavedPosition(movedRect, snap.TargetRect.Left, snap.TargetRect.Top))
@@ -1425,7 +1426,8 @@ namespace UiRuler
                 .ToDictionary(pair => pair.Key, pair => pair.Value);
 
             var dragDirection = GetDragDirection(startRects[movedIndex], movedRect);
-            if (!TryFindSnappedHotbarPosition(movedRect, otherRects, Cursor.Position, dragDirection, GetHotbarLayoutHorizontalGap(), out var snap))
+            var clientBounds = TryGetClientAreaLayoutRectangle();
+            if (!TryFindSnappedHotbarPosition(movedRect, otherRects, Cursor.Position, dragDirection, GetHotbarLayoutHorizontalGap(), clientBounds, out var snap))
             {
                 _snapPreviewActive = false;
                 return;
@@ -1503,7 +1505,7 @@ namespace UiRuler
             return dy < 0 ? SnapSide.Above : SnapSide.Below;
         }
 
-        private static bool TryFindSnappedHotbarPosition(Rectangle movedRect, Dictionary<int, Rectangle> otherRects, Point mouseScreen, SnapSide dragDirection, int horizontalGap, out HotbarSnapCandidate snap)
+        private static bool TryFindSnappedHotbarPosition(Rectangle movedRect, Dictionary<int, Rectangle> otherRects, Point mouseScreen, SnapSide dragDirection, int horizontalGap, Rectangle? clientBounds, out HotbarSnapCandidate snap)
         {
             snap = default;
             var candidates = new List<HotbarSnapCandidate>();
@@ -1527,6 +1529,9 @@ namespace UiRuler
                     .ThenBy(c => c.MouseDistance)
                     .ThenBy(c => c.MoveDistance))
                 {
+                    if (clientBounds.HasValue && !ContainsRect(clientBounds.Value, candidate.TargetRect))
+                        continue;
+
                     if (otherRects.Values.Any(rect => rect != anchor && RectsOverlap(candidate.TargetRect, rect)))
                         continue;
 
@@ -1590,6 +1595,14 @@ namespace UiRuler
                 && a.Right > b.Left
                 && a.Top < b.Bottom
                 && a.Bottom > b.Top;
+        }
+
+        private static bool ContainsRect(Rectangle outer, Rectangle inner)
+        {
+            return inner.Left >= outer.Left
+                && inner.Top >= outer.Top
+                && inner.Right <= outer.Right
+                && inner.Bottom <= outer.Bottom;
         }
 
         private static int DistanceFromPointToRect(Point point, Rectangle rect)
