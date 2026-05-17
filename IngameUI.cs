@@ -83,7 +83,7 @@ namespace UiRuler
 
         private readonly IDdoGameDataProvider _provider;
         private readonly string _folder;
-        private readonly System.Threading.Timer _timer;
+        private System.Threading.Timer _timer;
         private readonly RulerTarget[] _availableTargets;
         private readonly string _offsetSettingsPath;
         private readonly Dictionary<string, TargetOffset> _targetOffsets = new(StringComparer.Ordinal);
@@ -96,6 +96,7 @@ namespace UiRuler
         private bool _snapHotbarsEnabled;
         private bool _suppressHotbarSnap;
         private bool _snapPreviewActive;
+        private bool _timerStarted;
         private string _lastDetailsText = string.Empty;
         private Dictionary<int, Rectangle> _snapDragStartRects = new();
         private const int HotbarCount = 20;
@@ -193,9 +194,22 @@ namespace UiRuler
             cboTargetElement.SelectedIndex = 0;
             ApplyOffsetForSelectedTarget();
 
-            _overlay = CreateOverlay();
             chkEnabled.Checked = false;
-            _timer = new System.Threading.Timer(_ => BackgroundTick(), null, 0, 50);
+        }
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            StartBackgroundTimer();
+        }
+
+        private void StartBackgroundTimer()
+        {
+            if (_timerStarted || IsDisposed)
+                return;
+
+            _timerStarted = true;
+            _timer = new System.Threading.Timer(_ => BackgroundTick(), null, 500, 50);
         }
 
         private void ApplyHowToUseText()

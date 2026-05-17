@@ -15,7 +15,6 @@ namespace UiRuler
         public PluginUI(IDdoGameDataProvider provider, string folder)
         {
             _provider = provider;
-            _ingameUi = new IngameUI(provider, folder);
             _folder = folder;
         }
 
@@ -31,7 +30,7 @@ namespace UiRuler
             }
         }
 
-        public object UserInterfaceForm => _ingameUi;
+        public object UserInterfaceForm => _ingameUi ??= new IngameUI(_provider, _folder);
 
         public Tuple<int, int> MinSize => new(400, 200);
     }
