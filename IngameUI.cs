@@ -756,7 +756,20 @@ namespace UiRuler
             var json = JsonSerializer.Serialize(snapshots, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(path, json);
             txtLog.AppendText($"Hotbar positions saved: {path}{Environment.NewLine}");
+            ShowHotbarSavePath(path);
             lblStatus.Text = $"Saved {snapshots.Count} hotbars.";
+        }
+
+        private void ShowHotbarSavePath(string path)
+        {
+            lnkHotbarSavePath.Tag = path;
+            lnkHotbarSavePath.Text = $"Saved: {path} (click to copy)";
+            lnkHotbarSavePath.Visible = true;
+        }
+
+        private void lnkHotbarSavePath_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            CopyTextToClipboard(lnkHotbarSavePath.Tag?.ToString(), "Save path copied.");
         }
 
         private void btnLoadHotbars_Click(object sender, EventArgs e)

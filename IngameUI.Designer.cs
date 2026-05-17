@@ -39,6 +39,7 @@ namespace UiRuler
             btnSaveHotbars = new System.Windows.Forms.Button();
             btnLoadHotbars = new System.Windows.Forms.Button();
             txtHotbarLayout = new System.Windows.Forms.TextBox();
+            lnkHotbarSavePath = new System.Windows.Forms.LinkLabel();
             tabTools = new System.Windows.Forms.TabControl();
             tabUiRuler = new System.Windows.Forms.TabPage();
             tabHappyBars = new System.Windows.Forms.TabPage();
@@ -324,13 +325,28 @@ namespace UiRuler
             // 
             txtHotbarLayout.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             txtHotbarLayout.Font = new System.Drawing.Font("Consolas", 9F);
-            txtHotbarLayout.Location = new System.Drawing.Point(12, 104);
+            txtHotbarLayout.Location = new System.Drawing.Point(12, 124);
             txtHotbarLayout.Multiline = true;
             txtHotbarLayout.Name = "txtHotbarLayout";
             txtHotbarLayout.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            txtHotbarLayout.Size = new System.Drawing.Size(884, 444);
+            txtHotbarLayout.Size = new System.Drawing.Size(884, 424);
             txtHotbarLayout.TabIndex = 30;
             txtHotbarLayout.Text = "1,5\r\n2,6\r\n3,7\r\n4,8";
+            // 
+            // lnkHotbarSavePath
+            // 
+            lnkHotbarSavePath.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            lnkHotbarSavePath.AutoEllipsis = true;
+            lnkHotbarSavePath.Font = new System.Drawing.Font("Segoe UI", 8F);
+            lnkHotbarSavePath.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
+            lnkHotbarSavePath.Location = new System.Drawing.Point(12, 98);
+            lnkHotbarSavePath.Name = "lnkHotbarSavePath";
+            lnkHotbarSavePath.Size = new System.Drawing.Size(884, 20);
+            lnkHotbarSavePath.TabIndex = 36;
+            lnkHotbarSavePath.TabStop = true;
+            lnkHotbarSavePath.Text = "Saved hotbars path";
+            lnkHotbarSavePath.Visible = false;
+            lnkHotbarSavePath.LinkClicked += lnkHotbarSavePath_LinkClicked;
             // 
             // tabTools
             // 
@@ -377,6 +393,7 @@ namespace UiRuler
             // tabHappyBars
             // 
             tabHappyBars.Controls.Add(txtHotbarLayout);
+            tabHappyBars.Controls.Add(lnkHotbarSavePath);
             tabHappyBars.Controls.Add(nudVerticalGap);
             tabHappyBars.Controls.Add(lblVerticalGap);
             tabHappyBars.Controls.Add(nudHorizontalGap);
@@ -524,6 +541,7 @@ namespace UiRuler
         private System.Windows.Forms.NumericUpDown nudHorizontalGap;
         private System.Windows.Forms.Label lblVerticalGap;
         private System.Windows.Forms.NumericUpDown nudVerticalGap;
+        private System.Windows.Forms.LinkLabel lnkHotbarSavePath;
         private System.Windows.Forms.TabPage tabHowToUse;
         private System.Windows.Forms.RichTextBox txtHowToUse;
     }
