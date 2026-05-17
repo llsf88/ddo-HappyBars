@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.IO;
 using VoK.Sdk.Ddo;
 using VoK.Sdk.Plugins;
 
@@ -28,13 +27,6 @@ namespace UiRuler
         {
             get
             {
-                var iconPath = Path.Combine(_folder, "HappyBarsToolbarIcon.png");
-                if (File.Exists(iconPath))
-                {
-                    using var image = Image.FromFile(iconPath);
-                    return new Bitmap(image);
-                }
-
                 return (Image)Properties.Resources.NewToolbarIcon.Clone();
             }
         }

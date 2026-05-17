@@ -110,7 +110,7 @@ namespace UiRuler
         public IngameUI(IDdoGameDataProvider provider, string folder)
         {
             InitializeComponent();
-            txtHowToUse.Text = GetHowToUseText();
+            ApplyHowToUseText();
             tabTools.TabPages.Remove(tabUiRuler);
             tabTools.SelectedTab = tabHappyBars;
             Text = "HappyBars";
@@ -196,6 +196,95 @@ namespace UiRuler
             _overlay = CreateOverlay();
             chkEnabled.Checked = false;
             _timer = new System.Threading.Timer(_ => BackgroundTick(), null, 0, 50);
+        }
+
+        private void ApplyHowToUseText()
+        {
+            txtHowToUse.Clear();
+            txtHowToUse.BackColor = SystemColors.Window;
+            txtHowToUse.ForeColor = SystemColors.WindowText;
+            txtHowToUse.BorderStyle = BorderStyle.FixedSingle;
+
+            AppendHelpTitle("HappyBars - How to use");
+            AppendHelpSection("Set Hotbars");
+            AppendHelpText("Use the text box in the HappyBars tab to describe the layout you want. Each line becomes a row, and values separated by commas become columns.");
+            AppendHelpExample("1,5\r\n2,6\r\n3,7");
+
+            AppendHelpSection("Empty spaces");
+            AppendHelpText("Use ");
+            AppendHelpInlineCode("x");
+            AppendHelpText(" or ");
+            AppendHelpInlineCode("0");
+            AppendHelpText(" when you want to leave an empty slot in the layout.");
+            AppendHelpExample("x,3\r\n4,6\r\n9,5");
+
+            AppendHelpSection("Vertical hotbars");
+            AppendHelpText("Add ");
+            AppendHelpInlineCode("V");
+            AppendHelpText(" after a hotbar number to place that hotbar vertically.");
+            AppendHelpExample("1,5v\r\n2,6v");
+
+            AppendHelpSection("Gaps");
+            AppendHelpText("Use ");
+            AppendHelpInlineCode("H gap px");
+            AppendHelpText(" and ");
+            AppendHelpInlineCode("V gap px");
+            AppendHelpText(" to control the horizontal and vertical spacing between hotbars. Both default to 5 px.");
+
+            AppendHelpSection("Anchor and screen limits");
+            AppendHelpText("The first numbered hotbar in the first column is used as the anchor. If the full layout would go past the game client border, HappyBars moves the anchor first, then places the other hotbars around it. The bottom of the client is treated as 30 pixels shorter to avoid the XP bar.");
+
+            AppendHelpSection("Save Hotbars");
+            AppendHelpText("Saves the current hotbar positions, orientation, and current character. Save files are stored in the ");
+            AppendHelpInlineCode("saves");
+            AppendHelpText(" folder and use the character name and character ID.");
+
+            AppendHelpSection("Load Hotbars");
+            AppendHelpText("Loads the saved layout for the current character. HappyBars looks for the character ID first, then falls back to the character name. If a hotbar needs to change orientation, it rotates first and moves afterward.");
+
+            AppendHelpSection("Snap Hotbars");
+            AppendHelpText("When enabled, manually dragging a hotbar shows a visual snap preview. Snaps are chosen from the hotbar edges, similar to window snapping. Long edges are divided into possible slots based on the size of the hotbar being moved, while avoiding overlaps and positions outside the game client.");
+
+            AppendHelpSection("ESC");
+            AppendHelpText("Press ");
+            AppendHelpInlineCode("ESC");
+            AppendHelpText(" during Set Hotbars or Load Hotbars to stop moving hotbars.");
+            txtHowToUse.SelectionStart = 0;
+            txtHowToUse.SelectionLength = 0;
+        }
+
+        private void AppendHelpTitle(string text)
+        {
+            AppendHelp(text + Environment.NewLine + Environment.NewLine, new System.Drawing.Font("Segoe UI", 14f, System.Drawing.FontStyle.Bold), Color.FromArgb(25, 70, 120));
+        }
+
+        private void AppendHelpSection(string text)
+        {
+            AppendHelp(Environment.NewLine + text + Environment.NewLine, new System.Drawing.Font("Segoe UI", 10.5f, System.Drawing.FontStyle.Bold), Color.FromArgb(30, 30, 30));
+        }
+
+        private void AppendHelpText(string text)
+        {
+            AppendHelp(text, new System.Drawing.Font("Segoe UI", 10f, System.Drawing.FontStyle.Regular), Color.FromArgb(35, 35, 35));
+        }
+
+        private void AppendHelpInlineCode(string text)
+        {
+            AppendHelp(text, new System.Drawing.Font("Consolas", 10f, System.Drawing.FontStyle.Bold), Color.FromArgb(100, 50, 0));
+        }
+
+        private void AppendHelpExample(string text)
+        {
+            AppendHelp(Environment.NewLine + text + Environment.NewLine, new System.Drawing.Font("Consolas", 10f, System.Drawing.FontStyle.Regular), Color.FromArgb(0, 80, 80));
+        }
+
+        private void AppendHelp(string text, System.Drawing.Font font, Color color)
+        {
+            txtHowToUse.SelectionStart = txtHowToUse.TextLength;
+            txtHowToUse.SelectionLength = 0;
+            txtHowToUse.SelectionFont = font;
+            txtHowToUse.SelectionColor = color;
+            txtHowToUse.AppendText(text);
         }
 
         private static string GetHowToUseText()

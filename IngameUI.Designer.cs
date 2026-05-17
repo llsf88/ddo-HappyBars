@@ -48,7 +48,7 @@ namespace UiRuler
             lblVerticalGap = new System.Windows.Forms.Label();
             nudVerticalGap = new System.Windows.Forms.NumericUpDown();
             tabHowToUse = new System.Windows.Forms.TabPage();
-            txtHowToUse = new System.Windows.Forms.TextBox();
+            txtHowToUse = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)nudGridSpacing).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudOffsetX).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudOffsetY).BeginInit();
@@ -457,10 +457,9 @@ namespace UiRuler
             txtHowToUse.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             txtHowToUse.Font = new System.Drawing.Font("Segoe UI", 10F);
             txtHowToUse.Location = new System.Drawing.Point(12, 12);
-            txtHowToUse.Multiline = true;
             txtHowToUse.Name = "txtHowToUse";
             txtHowToUse.ReadOnly = true;
-            txtHowToUse.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            txtHowToUse.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
             txtHowToUse.ShortcutsEnabled = true;
             txtHowToUse.Size = new System.Drawing.Size(896, 538);
             txtHowToUse.TabIndex = 0;
@@ -526,6 +525,6 @@ namespace UiRuler
         private System.Windows.Forms.Label lblVerticalGap;
         private System.Windows.Forms.NumericUpDown nudVerticalGap;
         private System.Windows.Forms.TabPage tabHowToUse;
-        private System.Windows.Forms.TextBox txtHowToUse;
+        private System.Windows.Forms.RichTextBox txtHowToUse;
     }
 }

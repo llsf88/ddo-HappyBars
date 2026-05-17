@@ -53,11 +53,17 @@ If the full layout would go past the game client border, HappyBars moves the anc
 
 The bottom of the client is treated as 30 pixels shorter to avoid the XP bar.
 
+### Gaps
+
+Use `H gap px` and `V gap px` to control the horizontal and vertical spacing between hotbars.
+
+Both default to `5` pixels.
+
 ### Save Hotbars
 
 Saves the current hotbar positions, orientation, and current character.
 
-The save file uses the character name and character ID.
+Save files are stored in the `saves` folder and use the character name and character ID.
 
 ### Load Hotbars
 
@@ -71,9 +77,11 @@ If a hotbar needs to change orientation, it rotates first and moves afterward.
 
 When enabled, manually dragging a hotbar shows a visual snap preview.
 
-HappyBars chooses the neighboring hotbar closest to your mouse, then previews the final position.
+Snaps are chosen from the hotbar edges, similar to window snapping.
 
-It can snap above, below, left, or right, while avoiding overlaps with other hotbars.
+Long edges are divided into possible slots based on the size of the hotbar being moved.
+
+It can snap above, below, left, or right, while avoiding overlaps with other hotbars and positions outside the game client.
 
 ### ESC
 
