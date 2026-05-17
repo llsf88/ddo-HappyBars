@@ -1520,8 +1520,8 @@ namespace UiRuler
 
                 AddSnapCandidate(movedRect, anchor.Left, anchor.Top - movedRect.Height, anchor, SnapSide.Above, mouseScreen, candidates);
                 AddSnapCandidate(movedRect, anchor.Left, anchor.Bottom, anchor, SnapSide.Below, mouseScreen, candidates);
-                AddSnapCandidate(movedRect, anchor.Left - movedRect.Width - horizontalGap, anchor.Top, anchor, SnapSide.Left, mouseScreen, candidates);
-                AddSnapCandidate(movedRect, anchor.Right + horizontalGap, anchor.Top, anchor, SnapSide.Right, mouseScreen, candidates);
+                AddLateralSnapCandidates(movedRect, anchor, anchor.Left - movedRect.Width - horizontalGap, SnapSide.Left, mouseScreen, candidates);
+                AddLateralSnapCandidates(movedRect, anchor, anchor.Right + horizontalGap, SnapSide.Right, mouseScreen, candidates);
 
                 foreach (var candidate in candidates
                     .Where(c => c.NeighborRect == anchor)
@@ -1565,8 +1565,37 @@ namespace UiRuler
                 NeighborRect = anchor,
                 Side = side,
                 MoveDistance = distance,
-                MouseDistance = DistanceFromPointToRect(mouseScreen, anchor)
+                MouseDistance = DistanceFromPointToRect(mouseScreen, candidateRect)
             });
+        }
+
+        private static void AddLateralSnapCandidates(
+            Rectangle movedRect,
+            Rectangle anchor,
+            int left,
+            SnapSide side,
+            Point mouseScreen,
+            List<HotbarSnapCandidate> candidates)
+        {
+            var step = Math.Max(1, movedRect.Height);
+            var minTop = anchor.Top;
+            var maxTop = anchor.Bottom - movedRect.Height;
+
+            if (maxTop <= minTop)
+            {
+                AddSnapCandidate(movedRect, left, minTop, anchor, side, mouseScreen, candidates);
+                return;
+            }
+
+            var lastTop = int.MinValue;
+            for (var top = minTop; top <= maxTop; top += step)
+            {
+                AddSnapCandidate(movedRect, left, top, anchor, side, mouseScreen, candidates);
+                lastTop = top;
+            }
+
+            if (lastTop != maxTop)
+                AddSnapCandidate(movedRect, left, maxTop, anchor, side, mouseScreen, candidates);
         }
 
         private struct HotbarSnapCandidate
