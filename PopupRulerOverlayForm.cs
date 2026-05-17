@@ -74,8 +74,19 @@ namespace UiRuler
 
         public void UpdateSnapPreview(Rectangle movingRect, Rectangle neighborRect, Rectangle targetRect, SnapSide side)
         {
+            if (!IsReasonableSnapRect(movingRect) || !IsReasonableSnapRect(neighborRect) || !IsReasonableSnapRect(targetRect))
+            {
+                HideOverlay();
+                return;
+            }
+
             var bounds = Rectangle.Union(Rectangle.Union(movingRect, neighborRect), targetRect);
             bounds.Inflate(8, 8);
+            if (bounds.Width <= 0 || bounds.Height <= 0 || bounds.Width > 2200 || bounds.Height > 1400)
+            {
+                HideOverlay();
+                return;
+            }
 
             _snapMovingRect = movingRect;
             _snapNeighborRect = neighborRect;
@@ -159,6 +170,8 @@ namespace UiRuler
 
         private void DrawSnapPreview(Graphics g)
         {
+            g.Clear(KeyColor);
+
             var moving = ToLocal(_snapMovingRect);
             var neighbor = ToLocal(_snapNeighborRect);
             var target = ToLocal(_snapTargetRect);
@@ -167,23 +180,21 @@ namespace UiRuler
             using var neighborPen = new Pen(Color.Lime, 3);
             using var targetPen = new Pen(Color.Lime, 2) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dash };
             using var directionPen = new Pen(Color.Red, 4);
-            using var fillBrush = new SolidBrush(Color.FromArgb(34, Color.Lime));
-            using var textBrush = new SolidBrush(Color.White);
-            using var textBack = new SolidBrush(Color.FromArgb(190, 0, 0, 0));
-            using var font = new Font("Consolas", 10f, FontStyle.Bold);
 
-            g.FillRectangle(fillBrush, target);
             g.DrawRectangle(targetPen, target);
             g.DrawRectangle(movingPen, moving);
             g.DrawRectangle(neighborPen, neighbor);
             DrawSnapDirectionLine(g, directionPen, target, _snapSide);
+        }
 
-            var label = GetSnapSideLabel(_snapSide);
-            var size = g.MeasureString(label, font);
-            var labelX = Math.Max(4, Math.Min(target.Left + 4, Width - (int)size.Width - 14));
-            var labelY = Math.Max(4, Math.Min(target.Top + 4, Height - (int)size.Height - 10));
-            g.FillRectangle(textBack, labelX, labelY, size.Width + 10, size.Height + 6);
-            g.DrawString(label, font, textBrush, labelX + 5, labelY + 3);
+        private static bool IsReasonableSnapRect(Rectangle rect)
+        {
+            return rect.Width > 0
+                && rect.Height > 0
+                && rect.Width <= 500
+                && rect.Height <= 500
+                && Math.Abs(rect.Left) < 20000
+                && Math.Abs(rect.Top) < 20000;
         }
 
         private Rectangle ToLocal(Rectangle rect)
@@ -208,18 +219,6 @@ namespace UiRuler
                     g.DrawLine(pen, rect.Left, rect.Top, rect.Left, rect.Bottom);
                     break;
             }
-        }
-
-        private static string GetSnapSideLabel(SnapSide side)
-        {
-            return side switch
-            {
-                SnapSide.Above => "Snap above",
-                SnapSide.Below => "Snap below",
-                SnapSide.Left => "Snap left",
-                SnapSide.Right => "Snap right",
-                _ => "Snap"
-            };
         }
     }
 }
