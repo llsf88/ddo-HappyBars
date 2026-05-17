@@ -1510,7 +1510,7 @@ namespace UiRuler
             snap = default;
             var candidates = new List<HotbarSnapCandidate>();
 
-            foreach (var other in otherRects.OrderBy(pair => DistanceFromPointToRect(mouseScreen, pair.Value)))
+            foreach (var other in otherRects.OrderBy(pair => DistanceBetweenRects(movedRect, pair.Value)))
             {
                 var anchor = other.Value;
                 var gap = DistanceBetweenRects(movedRect, anchor);
@@ -1518,15 +1518,14 @@ namespace UiRuler
                 if (!overlaps && gap > SnapActivationPixels)
                     continue;
 
-                AddSnapCandidate(movedRect, anchor.Left, anchor.Top - movedRect.Height, anchor, SnapSide.Above, mouseScreen, candidates);
-                AddSnapCandidate(movedRect, anchor.Left, anchor.Bottom, anchor, SnapSide.Below, mouseScreen, candidates);
+                AddVerticalSnapCandidates(movedRect, anchor, anchor.Top - movedRect.Height, SnapSide.Above, candidates);
+                AddVerticalSnapCandidates(movedRect, anchor, anchor.Bottom, SnapSide.Below, candidates);
                 AddLateralSnapCandidates(movedRect, anchor, anchor.Left - movedRect.Width - horizontalGap, SnapSide.Left, mouseScreen, candidates);
                 AddLateralSnapCandidates(movedRect, anchor, anchor.Right + horizontalGap, SnapSide.Right, mouseScreen, candidates);
 
                 foreach (var candidate in candidates
                     .Where(c => c.NeighborRect == anchor)
                     .OrderBy(c => c.Side == dragDirection ? 0 : 1)
-                    .ThenBy(c => c.MouseDistance)
                     .ThenBy(c => c.MoveDistance))
                 {
                     if (clientBounds.HasValue && !ContainsRect(clientBounds.Value, candidate.TargetRect))
@@ -1564,9 +1563,36 @@ namespace UiRuler
                 TargetRect = candidateRect,
                 NeighborRect = anchor,
                 Side = side,
-                MoveDistance = distance,
-                MouseDistance = DistanceFromPointToRect(mouseScreen, candidateRect)
+                MoveDistance = distance
             });
+        }
+
+        private static void AddVerticalSnapCandidates(
+            Rectangle movedRect,
+            Rectangle anchor,
+            int top,
+            SnapSide side,
+            List<HotbarSnapCandidate> candidates)
+        {
+            var step = Math.Max(1, movedRect.Width);
+            var minLeft = anchor.Left;
+            var maxLeft = anchor.Right - movedRect.Width;
+
+            if (maxLeft <= minLeft)
+            {
+                AddSnapCandidate(movedRect, minLeft, top, anchor, side, Point.Empty, candidates);
+                return;
+            }
+
+            var lastLeft = int.MinValue;
+            for (var left = minLeft; left <= maxLeft; left += step)
+            {
+                AddSnapCandidate(movedRect, left, top, anchor, side, Point.Empty, candidates);
+                lastLeft = left;
+            }
+
+            if (lastLeft != maxLeft)
+                AddSnapCandidate(movedRect, maxLeft, top, anchor, side, Point.Empty, candidates);
         }
 
         private static void AddLateralSnapCandidates(
@@ -1607,8 +1633,6 @@ namespace UiRuler
             public SnapSide Side { get; init; }
 
             public int MoveDistance { get; init; }
-
-            public int MouseDistance { get; init; }
         }
 
         private static int DistanceBetweenRects(Rectangle a, Rectangle b)
