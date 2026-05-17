@@ -196,16 +196,16 @@ namespace UiRuler
             switch (side)
             {
                 case SnapSide.Above:
-                    g.DrawLine(pen, rect.Left, rect.Top, rect.Right, rect.Top);
-                    break;
-                case SnapSide.Below:
                     g.DrawLine(pen, rect.Left, rect.Bottom, rect.Right, rect.Bottom);
                     break;
+                case SnapSide.Below:
+                    g.DrawLine(pen, rect.Left, rect.Top, rect.Right, rect.Top);
+                    break;
                 case SnapSide.Left:
-                    g.DrawLine(pen, rect.Left, rect.Top, rect.Left, rect.Bottom);
+                    g.DrawLine(pen, rect.Right, rect.Top, rect.Right, rect.Bottom);
                     break;
                 case SnapSide.Right:
-                    g.DrawLine(pen, rect.Right, rect.Top, rect.Right, rect.Bottom);
+                    g.DrawLine(pen, rect.Left, rect.Top, rect.Left, rect.Bottom);
                     break;
             }
         }

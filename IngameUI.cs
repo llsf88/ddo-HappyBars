@@ -699,8 +699,8 @@ namespace UiRuler
         private string GetCharacterHotbarsFilePath()
         {
             var parts = GetCharacterFileParts();
-            var fileName = $"{parts.Name}_{parts.Id}_uiruler-hotbars.json";
-            return Path.Combine(_folder, fileName);
+            var fileName = $"{parts.Name}_{parts.Id}_hotbars.json";
+            return Path.Combine(GetHotbarSavesFolder(), fileName);
         }
 
         private string FindCharacterHotbarsFilePath()
@@ -710,6 +710,37 @@ namespace UiRuler
                 return exactPath;
 
             var parts = GetCharacterFileParts();
+            var savesFolder = GetHotbarSavesFolder();
+            var idMatch = Directory
+                .EnumerateFiles(savesFolder, $"*_{parts.Id}_hotbars.json")
+                .OrderByDescending(File.GetLastWriteTime)
+                .FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(idMatch))
+                return idMatch;
+
+            var nameMatch = Directory
+                .EnumerateFiles(savesFolder, $"{parts.Name}_*_hotbars.json")
+                .OrderByDescending(File.GetLastWriteTime)
+                .FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(nameMatch))
+                return nameMatch;
+
+            return FindLegacyCharacterHotbarsFilePath(parts);
+        }
+
+        private string GetHotbarSavesFolder()
+        {
+            var savesFolder = Path.Combine(_folder, "saves");
+            Directory.CreateDirectory(savesFolder);
+            return savesFolder;
+        }
+
+        private string FindLegacyCharacterHotbarsFilePath(CharacterFileParts parts)
+        {
+            var exactLegacy = Path.Combine(_folder, $"{parts.Name}_{parts.Id}_uiruler-hotbars.json");
+            if (File.Exists(exactLegacy))
+                return exactLegacy;
+
             var idMatch = Directory
                 .EnumerateFiles(_folder, $"*_{parts.Id}_uiruler-hotbars.json")
                 .OrderByDescending(File.GetLastWriteTime)
@@ -1341,7 +1372,8 @@ namespace UiRuler
                 .Where(pair => pair.Key != movedIndex)
                 .ToDictionary(pair => pair.Key, pair => pair.Value);
 
-            if (!TryFindSnappedHotbarPosition(movedRect, otherRects, Cursor.Position, out var snap))
+            var dragDirection = GetDragDirection(startRects[movedIndex], movedRect);
+            if (!TryFindSnappedHotbarPosition(movedRect, otherRects, Cursor.Position, dragDirection, out var snap))
                 return;
 
             if (IsAtSavedPosition(movedRect, snap.TargetRect.Left, snap.TargetRect.Top))
@@ -1377,7 +1409,8 @@ namespace UiRuler
                 .Where(pair => pair.Key != movedIndex)
                 .ToDictionary(pair => pair.Key, pair => pair.Value);
 
-            if (!TryFindSnappedHotbarPosition(movedRect, otherRects, Cursor.Position, out var snap))
+            var dragDirection = GetDragDirection(startRects[movedIndex], movedRect);
+            if (!TryFindSnappedHotbarPosition(movedRect, otherRects, Cursor.Position, dragDirection, out var snap))
             {
                 _snapPreviewActive = false;
                 return;
@@ -1445,7 +1478,17 @@ namespace UiRuler
                 target.IsVerticalHotbar ? VerticalHotbarHeight : HorizontalHotbarHeight);
         }
 
-        private static bool TryFindSnappedHotbarPosition(Rectangle movedRect, Dictionary<int, Rectangle> otherRects, Point mouseScreen, out HotbarSnapCandidate snap)
+        private static SnapSide GetDragDirection(Rectangle startRect, Rectangle currentRect)
+        {
+            var dx = currentRect.Left - startRect.Left;
+            var dy = currentRect.Top - startRect.Top;
+            if (Math.Abs(dx) >= Math.Abs(dy))
+                return dx < 0 ? SnapSide.Left : SnapSide.Right;
+
+            return dy < 0 ? SnapSide.Above : SnapSide.Below;
+        }
+
+        private static bool TryFindSnappedHotbarPosition(Rectangle movedRect, Dictionary<int, Rectangle> otherRects, Point mouseScreen, SnapSide dragDirection, out HotbarSnapCandidate snap)
         {
             snap = default;
             var candidates = new List<HotbarSnapCandidate>();
@@ -1465,7 +1508,8 @@ namespace UiRuler
 
                 foreach (var candidate in candidates
                     .Where(c => c.NeighborRect == anchor)
-                    .OrderBy(c => c.MouseDistance)
+                    .OrderBy(c => c.Side == dragDirection ? 0 : 1)
+                    .ThenBy(c => c.MouseDistance)
                     .ThenBy(c => c.MoveDistance))
                 {
                     if (otherRects.Values.Any(rect => rect != anchor && RectsOverlap(candidate.TargetRect, rect)))
