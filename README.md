@@ -86,3 +86,7 @@ It can snap above, below, left, or right, while avoiding overlaps with other hot
 ### ESC
 
 Press `ESC` during Set Hotbars or Load Hotbars to stop moving hotbars.
+
+---
+
+made by Dronael from Tharne. Only possible to be done because of the support of the amazing people in the DH discord. Feel free to contact me to fix bugs or with new ideas.
