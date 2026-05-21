@@ -20,10 +20,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="images\HappyBarsIcon.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<TargetPath>HappyBarsIcon.png</TargetPath>
-		</Content>
 		<Content Include="images\HappyBarsToolbarIcon.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<TargetPath>HappyBarsToolbarIcon.png</TargetPath>
@@ -47,13 +43,15 @@
 
 	<Target Name="PostBuildDevDebug" AfterTargets="Build" Condition="'$(Obfuscation)' != 'false' And '$(Configuration)'=='LocalDevDebug'">
 		<Exec WorkingDirectory="$(OutDir)" Command="copy * $(ProjectDir)..\..\..\dungeon-helper\src\VoK.DungeonHelper\bin\x64\Debug\net8.0-windows10.0.17763.0\win-x64\plugins\HappyBars\ " />
-		<Exec Command="del ..\\..\\..\\dungeon-helper\\src\\VoK.DungeonHelper\\bin\\x64\\Debug\\net8.0-windows10.0.17763.0\\win-x64\\plugins\\HappyBars\\System.Drawing.Common.dll" />
+		<Exec Command="cmd /c if exist &quot;..\..\..\dungeon-helper\src\VoK.DungeonHelper\bin\x64\Debug\net8.0-windows10.0.17763.0\win-x64\plugins\HappyBars\System.Drawing.Common.dll&quot; del /f /q &quot;..\..\..\dungeon-helper\src\VoK.DungeonHelper\bin\x64\Debug\net8.0-windows10.0.17763.0\win-x64\plugins\HappyBars\System.Drawing.Common.dll&quot;" />
+		<Exec Command="cmd /c if exist &quot;..\..\..\dungeon-helper\src\VoK.DungeonHelper\bin\x64\Debug\net8.0-windows10.0.17763.0\win-x64\plugins\HappyBars\HappyBarsIcon.png&quot; del /f /q &quot;..\..\..\dungeon-helper\src\VoK.DungeonHelper\bin\x64\Debug\net8.0-windows10.0.17763.0\win-x64\plugins\HappyBars\HappyBarsIcon.png&quot;" />
 	</Target>
 
 	<Target Name="PostBuildDebug" AfterTargets="Build" Condition="'$(Configuration)'=='Debug'">
 		<Exec Command="if not exist &quot;%USERPROFILE%\AppData\Roaming\Dungeon Helper\plugins\HappyBars&quot; (mkdir &quot;%USERPROFILE%\AppData\Roaming\Dungeon Helper\plugins\HappyBars&quot;)" />
 		<Exec WorkingDirectory="$(OutDir)" Command="copy * &quot;%USERPROFILE%\AppData\Roaming\Dungeon Helper\plugins\HappyBars\&quot; " />
-		<Exec Command="del &quot;%USERPROFILE%\AppData\Roaming\Dungeon Helper\plugins\HappyBars\System.Drawing.Common.dll&quot;" />
+		<Exec Command="cmd /c if exist &quot;%USERPROFILE%\AppData\Roaming\Dungeon Helper\plugins\HappyBars\System.Drawing.Common.dll&quot; del /f /q &quot;%USERPROFILE%\AppData\Roaming\Dungeon Helper\plugins\HappyBars\System.Drawing.Common.dll&quot;" />
+		<Exec Command="cmd /c if exist &quot;%USERPROFILE%\AppData\Roaming\Dungeon Helper\plugins\HappyBars\HappyBarsIcon.png&quot; del /f /q &quot;%USERPROFILE%\AppData\Roaming\Dungeon Helper\plugins\HappyBars\HappyBarsIcon.png&quot;" />
 	</Target>
 
 </Project>
