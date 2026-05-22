@@ -38,6 +38,7 @@ namespace UiRuler
             btnSetHotbars = new System.Windows.Forms.Button();
             btnSaveHotbars = new System.Windows.Forms.Button();
             btnLoadHotbars = new System.Windows.Forms.Button();
+            cboHotbarSaveFiles = new System.Windows.Forms.ComboBox();
             txtHotbarLayout = new System.Windows.Forms.TextBox();
             lnkHotbarSavePath = new System.Windows.Forms.LinkLabel();
             tabTools = new System.Windows.Forms.TabControl();
@@ -251,6 +252,17 @@ namespace UiRuler
             btnLoadHotbars.UseVisualStyleBackColor = true;
             btnLoadHotbars.Click += btnLoadHotbars_Click;
             // 
+            // cboHotbarSaveFiles
+            // 
+            cboHotbarSaveFiles.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            cboHotbarSaveFiles.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            cboHotbarSaveFiles.FormattingEnabled = true;
+            cboHotbarSaveFiles.Location = new System.Drawing.Point(404, 14);
+            cboHotbarSaveFiles.Name = "cboHotbarSaveFiles";
+            cboHotbarSaveFiles.Size = new System.Drawing.Size(260, 33);
+            cboHotbarSaveFiles.TabIndex = 37;
+            cboHotbarSaveFiles.DropDown += cboHotbarSaveFiles_DropDown;
+            // 
             // lblStatus
             // 
             lblStatus.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
@@ -399,6 +411,7 @@ namespace UiRuler
             tabHappyBars.Controls.Add(nudHorizontalGap);
             tabHappyBars.Controls.Add(lblHorizontalGap);
             tabHappyBars.Controls.Add(chkSnapHotbars);
+            tabHappyBars.Controls.Add(cboHotbarSaveFiles);
             tabHappyBars.Controls.Add(btnLoadHotbars);
             tabHappyBars.Controls.Add(btnSaveHotbars);
             tabHappyBars.Controls.Add(btnSetHotbars);
@@ -414,7 +427,7 @@ namespace UiRuler
             // 
             chkSnapHotbars.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left;
             chkSnapHotbars.AutoSize = true;
-            chkSnapHotbars.Location = new System.Drawing.Point(420, 16);
+            chkSnapHotbars.Location = new System.Drawing.Point(680, 16);
             chkSnapHotbars.Name = "chkSnapHotbars";
             chkSnapHotbars.Size = new System.Drawing.Size(149, 29);
             chkSnapHotbars.TabIndex = 31;
@@ -532,6 +545,7 @@ namespace UiRuler
         private System.Windows.Forms.Button btnSetHotbars;
         private System.Windows.Forms.Button btnSaveHotbars;
         private System.Windows.Forms.Button btnLoadHotbars;
+        private System.Windows.Forms.ComboBox cboHotbarSaveFiles;
         private System.Windows.Forms.TextBox txtHotbarLayout;
         private System.Windows.Forms.TabControl tabTools;
         private System.Windows.Forms.TabPage tabUiRuler;

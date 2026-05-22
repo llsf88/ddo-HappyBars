@@ -62,6 +62,15 @@ namespace UiRuler
             public string Id { get; init; }
         }
 
+        private sealed class HotbarSaveFileItem
+        {
+            public string DisplayName { get; init; }
+
+            public string Path { get; init; }
+
+            public override string ToString() => DisplayName;
+        }
+
         private sealed class HotbarLayoutEntry
         {
             public int Hotbar { get; init; }
@@ -120,6 +129,7 @@ namespace UiRuler
             _folder = folder;
             _offsetSettingsPath = Path.Combine(_folder, "uiruler-target-offsets.json");
             LoadTargetOffsets();
+            tabHappyBars.Enter += (_, _) => RefreshHotbarSaveFiles(GetSelectedHotbarSavePath());
 
             var targets = new List<RulerTarget>
             {
@@ -193,6 +203,7 @@ namespace UiRuler
             cboTargetElement.SelectedIndexChanged += cboTargetElement_SelectedIndexChanged;
             cboTargetElement.SelectedIndex = 0;
             ApplyOffsetForSelectedTarget();
+            RefreshHotbarSaveFiles();
 
             chkEnabled.Checked = false;
         }
@@ -757,6 +768,7 @@ namespace UiRuler
             File.WriteAllText(path, json);
             txtLog.AppendText($"Hotbar positions saved: {path}{Environment.NewLine}");
             ShowHotbarSavePath(path);
+            RefreshHotbarSaveFiles(path);
             lblStatus.Text = $"Saved {snapshots.Count} hotbars.";
         }
 
@@ -772,9 +784,14 @@ namespace UiRuler
             CopyTextToClipboard(lnkHotbarSavePath.Tag?.ToString(), "Save path copied.");
         }
 
+        private void cboHotbarSaveFiles_DropDown(object sender, EventArgs e)
+        {
+            RefreshHotbarSaveFiles(GetSelectedHotbarSavePath());
+        }
+
         private void btnLoadHotbars_Click(object sender, EventArgs e)
         {
-            var path = FindCharacterHotbarsFilePath();
+            var path = GetSelectedHotbarSavePath() ?? FindCharacterHotbarsFilePath();
             if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
             {
                 lblStatus.Text = "No hotbar save found for this character.";
@@ -815,6 +832,80 @@ namespace UiRuler
             lblStatus.Text = $"Loaded {moved}/{snapshots.Count} hotbars.";
         }
 
+        private string GetSelectedHotbarSavePath()
+        {
+            return cboHotbarSaveFiles.SelectedItem is HotbarSaveFileItem item && File.Exists(item.Path)
+                ? item.Path
+                : null;
+        }
+
+        private void RefreshHotbarSaveFiles(string preferredPath = null)
+        {
+            preferredPath = string.IsNullOrWhiteSpace(preferredPath) ? FindCharacterHotbarsFilePath() : preferredPath;
+            var files = EnumerateHotbarSaveFiles().ToList();
+            var parts = GetCharacterFileParts();
+
+            cboHotbarSaveFiles.BeginUpdate();
+            try
+            {
+                cboHotbarSaveFiles.Items.Clear();
+                foreach (var file in files)
+                {
+                    cboHotbarSaveFiles.Items.Add(new HotbarSaveFileItem
+                    {
+                        DisplayName = GetHotbarSaveDisplayName(file, parts),
+                        Path = file
+                    });
+                }
+
+                if (cboHotbarSaveFiles.Items.Count == 0)
+                    return;
+
+                var selectedIndex = 0;
+                if (!string.IsNullOrWhiteSpace(preferredPath))
+                {
+                    for (var i = 0; i < cboHotbarSaveFiles.Items.Count; i++)
+                    {
+                        if (cboHotbarSaveFiles.Items[i] is HotbarSaveFileItem item &&
+                            string.Equals(item.Path, preferredPath, StringComparison.OrdinalIgnoreCase))
+                        {
+                            selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+
+                cboHotbarSaveFiles.SelectedIndex = selectedIndex;
+            }
+            finally
+            {
+                cboHotbarSaveFiles.EndUpdate();
+            }
+        }
+
+        private string GetHotbarSaveDisplayName(string path, CharacterFileParts parts)
+        {
+            var fileName = Path.GetFileName(path);
+            var pluginFolder = GetPluginFolderName(path);
+            var currentMarker = IsCurrentCharacterSave(fileName, parts) ? "Current: " : string.Empty;
+            return $"{currentMarker}{fileName} [{pluginFolder}]";
+        }
+
+        private static string GetPluginFolderName(string path)
+        {
+            var folder = Path.GetDirectoryName(path);
+            if (string.Equals(Path.GetFileName(folder), "saves", StringComparison.OrdinalIgnoreCase))
+                folder = Directory.GetParent(folder)?.FullName;
+
+            return Path.GetFileName(folder) ?? "saves";
+        }
+
+        private static bool IsCurrentCharacterSave(string fileName, CharacterFileParts parts)
+        {
+            return fileName.Contains($"_{parts.Id}_", StringComparison.OrdinalIgnoreCase) ||
+                   fileName.StartsWith($"{parts.Name}_", StringComparison.OrdinalIgnoreCase);
+        }
+
         private string GetCharacterHotbarsFilePath()
         {
             var parts = GetCharacterFileParts();
@@ -829,22 +920,49 @@ namespace UiRuler
                 return exactPath;
 
             var parts = GetCharacterFileParts();
-            var savesFolder = GetHotbarSavesFolder();
-            var idMatch = Directory
-                .EnumerateFiles(savesFolder, $"*_{parts.Id}_hotbars.json")
+            var files = EnumerateHotbarSaveFiles().ToList();
+            var idMatch = files
+                .Where(path => Path.GetFileName(path).Contains($"_{parts.Id}_", StringComparison.OrdinalIgnoreCase))
                 .OrderByDescending(File.GetLastWriteTime)
                 .FirstOrDefault();
             if (!string.IsNullOrWhiteSpace(idMatch))
                 return idMatch;
 
-            var nameMatch = Directory
-                .EnumerateFiles(savesFolder, $"{parts.Name}_*_hotbars.json")
+            var nameMatch = files
+                .Where(path => Path.GetFileName(path).StartsWith($"{parts.Name}_", StringComparison.OrdinalIgnoreCase))
                 .OrderByDescending(File.GetLastWriteTime)
                 .FirstOrDefault();
             if (!string.IsNullOrWhiteSpace(nameMatch))
                 return nameMatch;
 
-            return FindLegacyCharacterHotbarsFilePath(parts);
+            return null;
+        }
+
+        private IEnumerable<string> EnumerateHotbarSaveFiles()
+        {
+            var folders = new List<string>
+            {
+                GetHotbarSavesFolder(),
+                _folder
+            };
+
+            var parentFolder = Directory.GetParent(_folder)?.FullName;
+            if (!string.IsNullOrWhiteSpace(parentFolder))
+            {
+                foreach (var pluginFolderName in new[] { "HappyBars", "UiRuler" })
+                {
+                    var pluginFolder = Path.Combine(parentFolder, pluginFolderName);
+                    folders.Add(Path.Combine(pluginFolder, "saves"));
+                    folders.Add(pluginFolder);
+                }
+            }
+
+            return folders
+                .Where(Directory.Exists)
+                .SelectMany(folder => Directory.EnumerateFiles(folder, "*_hotbars.json")
+                    .Concat(Directory.EnumerateFiles(folder, "*_uiruler-hotbars.json")))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderByDescending(File.GetLastWriteTime);
         }
 
         private string GetHotbarSavesFolder()
@@ -852,25 +970,6 @@ namespace UiRuler
             var savesFolder = Path.Combine(_folder, "saves");
             Directory.CreateDirectory(savesFolder);
             return savesFolder;
-        }
-
-        private string FindLegacyCharacterHotbarsFilePath(CharacterFileParts parts)
-        {
-            var exactLegacy = Path.Combine(_folder, $"{parts.Name}_{parts.Id}_uiruler-hotbars.json");
-            if (File.Exists(exactLegacy))
-                return exactLegacy;
-
-            var idMatch = Directory
-                .EnumerateFiles(_folder, $"*_{parts.Id}_uiruler-hotbars.json")
-                .OrderByDescending(File.GetLastWriteTime)
-                .FirstOrDefault();
-            if (!string.IsNullOrWhiteSpace(idMatch))
-                return idMatch;
-
-            return Directory
-                .EnumerateFiles(_folder, $"{parts.Name}_*_uiruler-hotbars.json")
-                .OrderByDescending(File.GetLastWriteTime)
-                .FirstOrDefault();
         }
 
         private CharacterFileParts GetCharacterFileParts()
