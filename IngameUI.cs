@@ -946,17 +946,6 @@ namespace UiRuler
                 _folder
             };
 
-            var parentFolder = Directory.GetParent(_folder)?.FullName;
-            if (!string.IsNullOrWhiteSpace(parentFolder))
-            {
-                foreach (var pluginFolderName in new[] { "HappyBars", "UiRuler" })
-                {
-                    var pluginFolder = Path.Combine(parentFolder, pluginFolderName);
-                    folders.Add(Path.Combine(pluginFolder, "saves"));
-                    folders.Add(pluginFolder);
-                }
-            }
-
             return folders
                 .Where(Directory.Exists)
                 .SelectMany(folder => Directory.EnumerateFiles(folder, "*_hotbars.json")
