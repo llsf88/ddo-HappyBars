@@ -111,6 +111,7 @@ namespace UiRuler
         private string _lastDetailsText = string.Empty;
         private Dictionary<int, Rectangle> _snapDragStartRects = new();
         private const int HotbarCount = 20;
+        private const int PrimaryShortcutBarSnapKey = HotbarCount;
         private const int HorizontalHotbarWidth = 402;
         private const int HorizontalHotbarHeight = 44;
         private const int VerticalHotbarWidth = 42;
@@ -770,6 +771,7 @@ namespace UiRuler
             {
                 snapshots.Add(BuildHotbarSnapshot(i));
             }
+            snapshots.Add(BuildPrimaryShortcutBarSnapshot());
 
             var path = GetCharacterHotbarsFilePath();
             var json = JsonSerializer.Serialize(snapshots, new JsonSerializerOptions { WriteIndented = true });
@@ -826,7 +828,7 @@ namespace UiRuler
                     return;
                 }
 
-                if (!snapshot.RawRect.HasValue || snapshot.Hotbar <= 0)
+                if (!snapshot.RawRect.HasValue || (snapshot.Hotbar <= 0 && !IsPrimaryShortcutBarSnapshot(snapshot)))
                     continue;
 
                 if (LoadHotbarSnapshot(snapshot))
@@ -1346,6 +1348,7 @@ namespace UiRuler
 
         private bool LoadHotbarSnapshot(HotbarSnapshot snapshot)
         {
+            var isPrimaryShortcutBar = IsPrimaryShortcutBarSnapshot(snapshot);
             var desiredVertical = string.Equals(snapshot.Orientation, "Vertical", StringComparison.OrdinalIgnoreCase);
             var desiredLeft = snapshot.RawRect.Value.Left;
             var desiredTop = snapshot.RawRect.Value.Top;
@@ -1355,7 +1358,9 @@ namespace UiRuler
                 if (IsEscapePressed())
                     return false;
 
-                var target = EnsureHotbarOrientation(snapshot.Hotbar - 1, desiredVertical);
+                var target = isPrimaryShortcutBar
+                    ? CreatePrimaryShortcutBarTarget()
+                    : EnsureHotbarOrientation(snapshot.Hotbar - 1, desiredVertical);
                 if (target == null)
                     return false;
 
@@ -1458,6 +1463,30 @@ namespace UiRuler
                     ? new Rectangle(rawRect.Value.Left + offset.X, rawRect.Value.Top + offset.Y, rawRect.Value.Width, rawRect.Value.Height)
                     : null
             };
+        }
+
+        private HotbarSnapshot BuildPrimaryShortcutBarSnapshot()
+        {
+            var target = CreatePrimaryShortcutBarTarget();
+            var rawRect = target == null ? null : TryGetTargetRectangle(target);
+            var offset = GetTargetOffset(target);
+
+            return new HotbarSnapshot
+            {
+                Hotbar = 0,
+                Orientation = "Horizontal",
+                ElementId = target?.ElementId?.ToString() ?? "ShortcutsBar",
+                Offset = offset,
+                RawRect = rawRect,
+                AdjustedRect = rawRect.HasValue
+                    ? new Rectangle(rawRect.Value.Left + offset.X, rawRect.Value.Top + offset.Y, rawRect.Value.Width, rawRect.Value.Height)
+                    : null
+            };
+        }
+
+        private static bool IsPrimaryShortcutBarSnapshot(HotbarSnapshot snapshot)
+        {
+            return string.Equals(snapshot.ElementId, "ShortcutsBar", StringComparison.OrdinalIgnoreCase);
         }
 
         private static RulerTarget ChooseHotbarTarget(
@@ -1613,6 +1642,11 @@ namespace UiRuler
                     rects[i] = NormalizeHotbarRect(target, rect.Value);
             }
 
+            var primaryTarget = CreatePrimaryShortcutBarTarget();
+            var primaryRect = primaryTarget == null ? null : TryGetTargetRectangle(primaryTarget);
+            if (primaryRect.HasValue)
+                rects[PrimaryShortcutBarSnapKey] = NormalizeHotbarRect(primaryTarget, primaryRect.Value);
+
             return rects;
         }
 
@@ -1653,7 +1687,9 @@ namespace UiRuler
             if (IsAtSavedPosition(movedRect, snap.TargetRect.Left, snap.TargetRect.Top))
                 return;
 
-            var target = ChooseCurrentHotbarTarget(movedIndex);
+            var target = movedIndex == PrimaryShortcutBarSnapKey
+                ? CreatePrimaryShortcutBarTarget()
+                : ChooseCurrentHotbarTarget(movedIndex);
             if (target == null)
                 return;
 
