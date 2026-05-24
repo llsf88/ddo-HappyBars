@@ -337,11 +337,11 @@ namespace UiRuler
             // 
             txtHotbarLayout.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             txtHotbarLayout.Font = new System.Drawing.Font("Consolas", 9F);
-            txtHotbarLayout.Location = new System.Drawing.Point(12, 124);
+            txtHotbarLayout.Location = new System.Drawing.Point(12, 132);
             txtHotbarLayout.Multiline = true;
             txtHotbarLayout.Name = "txtHotbarLayout";
             txtHotbarLayout.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            txtHotbarLayout.Size = new System.Drawing.Size(884, 424);
+            txtHotbarLayout.Size = new System.Drawing.Size(884, 416);
             txtHotbarLayout.TabIndex = 30;
             txtHotbarLayout.Text = "1,5\r\n2,6\r\n3,7\r\n4,8";
             // 
@@ -351,7 +351,7 @@ namespace UiRuler
             lnkHotbarSavePath.AutoEllipsis = true;
             lnkHotbarSavePath.Font = new System.Drawing.Font("Segoe UI", 8F);
             lnkHotbarSavePath.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
-            lnkHotbarSavePath.Location = new System.Drawing.Point(12, 98);
+            lnkHotbarSavePath.Location = new System.Drawing.Point(12, 56);
             lnkHotbarSavePath.Name = "lnkHotbarSavePath";
             lnkHotbarSavePath.Size = new System.Drawing.Size(884, 20);
             lnkHotbarSavePath.TabIndex = 36;
@@ -427,7 +427,7 @@ namespace UiRuler
             // 
             chkSnapHotbars.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left;
             chkSnapHotbars.AutoSize = true;
-            chkSnapHotbars.Location = new System.Drawing.Point(420, 62);
+            chkSnapHotbars.Location = new System.Drawing.Point(420, 92);
             chkSnapHotbars.Name = "chkSnapHotbars";
             chkSnapHotbars.Size = new System.Drawing.Size(149, 29);
             chkSnapHotbars.TabIndex = 31;
@@ -438,7 +438,7 @@ namespace UiRuler
             // lblHorizontalGap
             // 
             lblHorizontalGap.AutoSize = true;
-            lblHorizontalGap.Location = new System.Drawing.Point(12, 64);
+            lblHorizontalGap.Location = new System.Drawing.Point(12, 94);
             lblHorizontalGap.Name = "lblHorizontalGap";
             lblHorizontalGap.Size = new System.Drawing.Size(92, 25);
             lblHorizontalGap.TabIndex = 32;
@@ -446,7 +446,7 @@ namespace UiRuler
             // 
             // nudHorizontalGap
             // 
-            nudHorizontalGap.Location = new System.Drawing.Point(110, 60);
+            nudHorizontalGap.Location = new System.Drawing.Point(110, 90);
             nudHorizontalGap.Maximum = new decimal(new int[] { 50, 0, 0, 0 });
             nudHorizontalGap.Name = "nudHorizontalGap";
             nudHorizontalGap.Size = new System.Drawing.Size(80, 31);
@@ -456,7 +456,7 @@ namespace UiRuler
             // lblVerticalGap
             // 
             lblVerticalGap.AutoSize = true;
-            lblVerticalGap.Location = new System.Drawing.Point(214, 64);
+            lblVerticalGap.Location = new System.Drawing.Point(214, 94);
             lblVerticalGap.Name = "lblVerticalGap";
             lblVerticalGap.Size = new System.Drawing.Size(88, 25);
             lblVerticalGap.TabIndex = 34;
@@ -464,7 +464,7 @@ namespace UiRuler
             // 
             // nudVerticalGap
             // 
-            nudVerticalGap.Location = new System.Drawing.Point(308, 60);
+            nudVerticalGap.Location = new System.Drawing.Point(308, 90);
             nudVerticalGap.Maximum = new decimal(new int[] { 50, 0, 0, 0 });
             nudVerticalGap.Name = "nudVerticalGap";
             nudVerticalGap.Size = new System.Drawing.Size(80, 31);
