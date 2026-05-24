@@ -75,6 +75,8 @@ namespace UiRuler
         {
             public int Hotbar { get; init; }
 
+            public bool UsePrimaryShortcutBar { get; init; }
+
             public int Row { get; init; }
 
             public int Column { get; init; }
@@ -368,6 +370,10 @@ namespace UiRuler
 
         private static void AddUndockedHotbarTargets(List<RulerTarget> targets)
         {
+            var primaryShortcutBar = CreatePrimaryShortcutBarTarget();
+            if (primaryShortcutBar != null)
+                targets.Add(primaryShortcutBar);
+
             for (var i = 0; i < HotbarCount; i++)
             {
                 var horizontalName = $"UndockedShortcut{i}_Horizontal_MarkerList";
@@ -715,11 +721,13 @@ namespace UiRuler
                 .FirstOrDefault()
                 ?? entries.OrderBy(e => e.Row).ThenBy(e => e.Column).First();
 
-            var anchorTarget = ChooseCurrentHotbarTarget(anchor.Hotbar - 1);
+            var anchorTarget = anchor.UsePrimaryShortcutBar
+                ? CreatePrimaryShortcutBarTarget()
+                : ChooseCurrentHotbarTarget(anchor.Hotbar - 1);
             var anchorRect = anchorTarget == null ? null : TryGetTargetRectangle(anchorTarget);
             if (!anchorRect.HasValue)
             {
-                lblStatus.Text = $"Hotbar {anchor.Hotbar} not found.";
+                lblStatus.Text = $"{GetHotbarLayoutEntryName(anchor)} not found.";
                 return;
             }
 
@@ -1089,6 +1097,7 @@ namespace UiRuler
             }
 
             var used = new HashSet<int>();
+            var usedPrimaryShortcutBar = false;
             for (var row = 0; row < lines.Length; row++)
             {
                 var columns = lines[row].Split(',');
@@ -1104,6 +1113,26 @@ namespace UiRuler
                     var vertical = token.EndsWith("v", StringComparison.OrdinalIgnoreCase);
                     if (vertical)
                         token = token[..^1].Trim();
+
+                    if (string.Equals(token, "s", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (usedPrimaryShortcutBar)
+                        {
+                            error = "Special hotbar S appears twice.";
+                            return false;
+                        }
+
+                        usedPrimaryShortcutBar = true;
+                        entries.Add(new HotbarLayoutEntry
+                        {
+                            Hotbar = 0,
+                            UsePrimaryShortcutBar = true,
+                            Row = row,
+                            Column = column,
+                            Vertical = vertical
+                        });
+                        continue;
+                    }
 
                     if (!int.TryParse(token, out var hotbar) || hotbar < 1 || hotbar > HotbarCount)
                     {
@@ -1128,6 +1157,11 @@ namespace UiRuler
             }
 
             return true;
+        }
+
+        private static string GetHotbarLayoutEntryName(HotbarLayoutEntry entry)
+        {
+            return entry.UsePrimaryShortcutBar ? "Special hotbar S (ShortcutsBar)" : $"Hotbar {entry.Hotbar}";
         }
 
         private void PositionLayout(List<HotbarLayoutEntry> entries, HotbarLayoutEntry anchor, Point anchorLocation)
@@ -1180,10 +1214,15 @@ namespace UiRuler
                 return ordered;
 
             return ordered
-                .OrderBy(e => e.Hotbar == anchor.Hotbar ? 0 : 1)
+                .OrderBy(e => IsSameHotbarLayoutEntry(e, anchor) ? 0 : 1)
                 .ThenBy(e => e.Row)
                 .ThenBy(e => e.Column)
                 .ToList();
+        }
+
+        private static bool IsSameHotbarLayoutEntry(HotbarLayoutEntry left, HotbarLayoutEntry right)
+        {
+            return left.UsePrimaryShortcutBar == right.UsePrimaryShortcutBar && left.Hotbar == right.Hotbar;
         }
 
         private bool ConstrainLayoutToGameClient(List<HotbarLayoutEntry> entries, out bool layoutWasShifted)
@@ -1253,7 +1292,9 @@ namespace UiRuler
                 if (IsEscapePressed())
                     return false;
 
-                var target = EnsureHotbarOrientation(entry.Hotbar - 1, entry.Vertical);
+                var target = entry.UsePrimaryShortcutBar
+                    ? CreatePrimaryShortcutBarTarget()
+                    : EnsureHotbarOrientation(entry.Hotbar - 1, entry.Vertical);
                 if (target == null)
                     return false;
 
@@ -1477,6 +1518,19 @@ namespace UiRuler
                 IsHotbar = true,
                 IsVerticalHotbar = vertical
             };
+        }
+
+        private static RulerTarget CreatePrimaryShortcutBarTarget()
+        {
+            return Enum.TryParse("ShortcutsBar", out UIElementID elementId)
+                ? new RulerTarget
+                {
+                    Label = "ShortcutsBar",
+                    ElementId = elementId,
+                    IsHotbar = true,
+                    IsVerticalHotbar = false
+                }
+                : null;
         }
 
         private static int GetHotbarIndex(RulerTarget target)

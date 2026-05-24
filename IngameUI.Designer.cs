@@ -427,7 +427,7 @@ namespace UiRuler
             // 
             chkSnapHotbars.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left;
             chkSnapHotbars.AutoSize = true;
-            chkSnapHotbars.Location = new System.Drawing.Point(680, 16);
+            chkSnapHotbars.Location = new System.Drawing.Point(420, 62);
             chkSnapHotbars.Name = "chkSnapHotbars";
             chkSnapHotbars.Size = new System.Drawing.Size(149, 29);
             chkSnapHotbars.TabIndex = 31;
