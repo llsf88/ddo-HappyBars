@@ -259,7 +259,7 @@ namespace UiRuler
             cboHotbarSaveFiles.FormattingEnabled = true;
             cboHotbarSaveFiles.Location = new System.Drawing.Point(404, 14);
             cboHotbarSaveFiles.Name = "cboHotbarSaveFiles";
-            cboHotbarSaveFiles.Size = new System.Drawing.Size(260, 33);
+            cboHotbarSaveFiles.Size = new System.Drawing.Size(492, 33);
             cboHotbarSaveFiles.TabIndex = 37;
             cboHotbarSaveFiles.DropDown += cboHotbarSaveFiles_DropDown;
             // 
